@@ -10,9 +10,6 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import android.widget.Toast
-
-import com.google.zxing.integration.android.IntentResult
-
 import android.content.Intent
 
 
@@ -22,6 +19,7 @@ import android.content.Intent
 class MainActivity: FlutterActivity() {
 
     private val CHANNEL = "qr_reader"
+      var qrResult : String? = null
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
 
@@ -31,7 +29,7 @@ class MainActivity: FlutterActivity() {
             if (call.method == "qr") {
                 val qrResponse = readQr()
 
-                if (!qrResponse.isNullOrEmpty()) {
+                if (!qrResult.isNullOrEmpty()) {
                     result.success(qrResponse)
                 } else {
                     result.error("UNAVAILABLE", "QR Reader not available.", null)
@@ -43,15 +41,13 @@ class MainActivity: FlutterActivity() {
     }
 
 
-    private fun readQr(): String {
+    private fun readQr() {
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED){
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA),123)
 
         } else {
             startScanning()
         }
-
-        return "qr response"
     }
 
     fun startScanning() {
@@ -61,7 +57,6 @@ class MainActivity: FlutterActivity() {
         qrScanner.setCameraId(0)
         qrScanner.setBeepEnabled(true)
         qrScanner.initiateScan()
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -71,6 +66,8 @@ class MainActivity: FlutterActivity() {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
             } else {
                 Toast.makeText(this, "Scanned: " + result.contents, Toast.LENGTH_LONG).show()
+                qrResult = result.contents;
+                println("toast cevap  ${result.contents}")
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
